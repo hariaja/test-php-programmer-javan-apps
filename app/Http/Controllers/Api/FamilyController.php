@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
-use App\DataTables\FamilyDataTable;
+use App\Http\Controllers\Controller;
 use App\Models\Family;
 use Illuminate\Http\Request;
 
@@ -11,19 +11,12 @@ class FamilyController extends Controller
   /**
    * Display a listing of the resource.
    */
-  public function index(FamilyDataTable $dataTable)
-  {
-    $families = Family::with('children')->whereNull('parent_id')->get();
-    return $dataTable->render('families.index', compact('families'));
-  }
-
-  /**
-   * Show the form for creating a new resource.
-   */
-  public function create()
+  public function index()
   {
     $families = Family::all();
-    return view('families.create', compact('families'));
+    return response()->json([
+      'data' => $families,
+    ]);
   }
 
   /**
@@ -37,8 +30,12 @@ class FamilyController extends Controller
       'parent_id' => 'nullable|exists:families,id',
     ]);
 
-    Family::create($request->all());
-    return redirect(route('families.index'))->withSuccess('Berhasil menambahkan data keluarga');
+    $data = Family::create($request->all());
+    return response()->json([
+      'status' => 200,
+      'message' => 'Berhasil MEMBUAT data anggota Keluarga',
+      'data' => $data,
+    ]);
   }
 
   /**
@@ -46,16 +43,11 @@ class FamilyController extends Controller
    */
   public function show(Family $family)
   {
-    //
-  }
-
-  /**
-   * Show the form for editing the specified resource.
-   */
-  public function edit(Family $family)
-  {
-    $families = Family::where('id', '!=', $family->id)->get();
-    return view('families.edit', compact('family', 'families'));
+    return response()->json([
+      'status' => 200,
+      'message' => 'Berhasil MENAMPILKAN detail data anggota Keluarga',
+      'data' => $family,
+    ]);
   }
 
   /**
@@ -70,8 +62,11 @@ class FamilyController extends Controller
     ]);
 
     $family->update($request->all());
-
-    return redirect(route('families.index'))->withSuccess('Data anggota keluarga berhasil diperbarui.');
+    return response()->json([
+      'status' => 200,
+      'message' => 'Berhasil MENGUBAH data anggota Keluarga',
+      'data' => $family,
+    ]);
   }
 
   /**
@@ -81,7 +76,8 @@ class FamilyController extends Controller
   {
     Family::destroy($family->id);
     return response()->json([
-      'message' => 'Berhasil menghapus data keluarga'
+      'status' => 200,
+      'message' => 'Berhasil MENGHAPUS data anggota Keluarga',
     ]);
   }
 }
